@@ -5,6 +5,8 @@
 #include <string>
 #include <vector>
 #include <boost\filesystem.hpp>
+#include <boost/iostreams/device/mapped_file.hpp>
+namespace io = boost::iostreams;
 using namespace std;
 using namespace boost::filesystem;
 
@@ -108,8 +110,17 @@ private:
 		for (auto& f : what.getRegularFiles())
 			copy(f, whereDir.string() + "\\" + f.filename().string());
 	}
-	void compareFilesAndPostNewVersionIfNeeded(path& what, path& where) {
+	void compareFilesAndPostNewVersionIfNeeded(path& what, path& where)
+	{
+		bool cmp = compareFiles(what, where);
+	}
+	int compareFiles(path& p1, path& p2)
+	{
+		io::mapped_file_source f1(p1);
+		io::mapped_file_source f2(p2);
 
+		return f1.size() == f2.size()
+			&& std::equal(f1.data(), f1.data() + f1.size(), f2.data());
 	}
 };
 
