@@ -61,8 +61,9 @@ public:
 class synchro {
 	dir _from;
 	dir _to;
+	dir _repoDir;
 public:
-	synchro(path from, path to) : _from(from, nullptr), _to(to, nullptr) {}
+	synchro(path from, path to) : _from(from, nullptr), _to(to, nullptr), _repoDir(to.string() + "\\" + ".synchro", nullptr) {}
 	void sync()
 	{
 		sync(_from, _to);
@@ -113,8 +114,17 @@ private:
 	void compareFilesAndPostNewVersionIfNeeded(path& what, path& where)
 	{
 		bool cmp = compareFiles(what, where);
+		if (!cmp)
+		{
+			versionOldFile(where);
+			copy(what, where);
+		}
 	}
-	int compareFiles(path& p1, path& p2)
+	void versionOldFile(path& p)
+	{
+		remove(p);
+	}
+	bool compareFiles(path& p1, path& p2)
 	{
 		io::mapped_file_source f1(p1);
 		io::mapped_file_source f2(p2);
